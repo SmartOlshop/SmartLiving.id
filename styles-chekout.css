@@ -1,0 +1,78 @@
+/* Styling Umum */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f8f8;
+    text-align: center;
+}
+
+/* Header */
+h1 {
+    background-color: #6200ea;
+    color: white;
+    padding: 15px 0;
+    margin-bottom: 20px;
+}
+
+/* Form Checkout */
+form {
+    background: white;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+form h3 {
+    color: #333;
+    border-bottom: 2px solid #6200ea;
+    padding-bottom: 5px;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+textarea {
+    height: 80px;
+    resize: none;
+}
+
+/* Tombol Checkout */
+button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    background-color: #6200ea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background-color: #4b00b0;
+}
+
+/* Responsif */
+@media (max-width: 480px) {
+    form {
+        width: 90%;
+    }
+}

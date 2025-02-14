@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Informasi Pembayaran</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="SMART LIVING.png">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #4b00b0;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .payment-container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    .payment-container h2 {
+      margin-bottom: 20px;
+    }
+    .payment-method-info {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .payment-account {
+      font-size: 20px;
+      font-weight: bold;
+      color: #d32f2f;
+    }
+    .btn {
+      display: inline-block;
+      background: #ff6f61;
+      color: #fff;
+      padding: 10px 20px;
+      margin-top: 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: #ff4b3e;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Informasi Pembayaran</h1>
+  </header>
+  <div class="payment-container">
+    <h2>Silakan Lakukan Pembayaran</h2>
+    <div id="payment-info">
+      <!-- Informasi pembayaran akan muncul di sini -->
+    </div>
+    <!-- Tombol untuk Konfirmasi Pembelian via WhatsApp -->
+    <button class="btn" id="whatsapp-btn">Konfirmasi Pembelian via WhatsApp</button>
+    <br>
+    <a class="btn" href="index.html">Kembali ke Beranda</a>
+  </div>
+  <script>
+    // Ambil parameter metode pembayaran dan total harga dari URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentMethod = urlParams.get('method');
+    const priceParam = urlParams.get('price');
+
+    // Format harga dengan pemisah ribuan
+    let totalPriceText = "";
+    if(priceParam) {
+      totalPriceText = "Rp " + parseInt(priceParam, 10).toLocaleString();
+    } else {
+      totalPriceText = "Rp 0";
+    }
+
+    const paymentInfoDiv = document.getElementById("payment-info");
+    let infoHTML = "";
+    if(paymentMethod === "Transfer Bank") {
+      infoHTML = `
+        <p class="payment-method-info">Silahkan transfer sejumlah <strong>${totalPriceText}</strong> ke rekening berikut:</p>
+        <p class="payment-account">Bank BRI: 4118 0101 1102 533</p>
+        <p class="payment-account">Atas Nama: SITI SHOLIHAT</p>
+        <p><b>Mohon screenshot bukti pembayaran dan kirim ke nomor yang sama atau dibawah ini:</b><br><strong>083820704602</strong></p>
+      `;
+    } else if(paymentMethod === "E-Wallet") {
+      infoHTML = `
+        <p class="payment-method-info">Silahkan transfer sejumlah <strong>${totalPriceText}</strong> melalui e-wallet berikut:</p>
+        <p class="payment-account">ShopeePay: 089507431393</p>
+        <p class="payment-account">Gopay: 083820704602</p>
+        <p class="payment-account">Atas Nama:<br> ShopeePay: donifirmansyah929<br> Gopay: Doni Firmansyah  </p>
+        <p><b>Mohon screenshot bukti pembayaran dan kirim ke nomor yang sama atau di bawah ini:</b><br><strong>083820704302</strong></p>
+      `;
+    } else {
+      infoHTML = `<p class="payment-method-info">Metode pembayaran tidak dikenali.</p>`;
+    }
+    paymentInfoDiv.innerHTML = infoHTML;
+
+    // Tombol Konfirmasi Pembelian via WhatsApp
+    document.getElementById("whatsapp-btn").addEventListener("click", function() {
+      // Ambil pesan WhatsApp yang sudah disimpan di localStorage oleh halaman checkout
+      let message = localStorage.getItem("whatsappMessage") || "";
+      
+      if (!message) {
+        alert("Pesan pemesanan tidak ditemukan. Pastikan Anda sudah mengkonfirmasi pembelian.");
+        return;
+      }
+      
+      // Nomor WhatsApp yang dituju (sesuaikan dengan kebutuhan)
+      const whatsappNumber = "6283820704602 "; // Gunakan format kode negara (misal: 62 untuk Indonesia)
+      
+      // Buat URL WhatsApp
+      const whatsappUrl = "https://api.whatsapp.com/send?phone=" + whatsappNumber + "&text=" + encodeURIComponent(message);
+      
+      // Arahkan ke WhatsApp
+      window.location.href = whatsappUrl;
+    });
+  </script>
+</body>
+</html>

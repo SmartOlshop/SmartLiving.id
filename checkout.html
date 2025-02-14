@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/png" href="SMART LIVING.png">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #4b00b0;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .checkout-container {
+      max-width: 800px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .checkout-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+    }
+    .checkout-item img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      margin-right: 15px;
+    }
+    .item-details {
+      flex: 1;
+    }
+    .total {
+      font-size: 24px;
+      font-weight: bold;
+      text-align: right;
+      margin-top: 20px;
+    }
+    form {
+      margin-top: 30px;
+    }
+    form input, form textarea, form select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+    form button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #4b00b0;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Checkout</h1>
+  </header>
+  <div class="checkout-container">
+    <div id="direct-purchase-summary"></div>
+    <div id="checkout-items"></div>
+    <div class="total" id="total-price"></div>
+
+    <form id="checkout-form">
+      <h3>Data Pembeli</h3>
+      <label for="name">Nama Lengkap:</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="phone">No. Telepon:</label>
+      <input type="tel" id="phone" name="phone" required>
+
+      <label for="address">Alamat Pengiriman:</label>
+      <textarea id="address" name="address" required></textarea>
+
+      <h3>Metode Pembayaran</h3>
+      <select id="payment-method" required>
+        <option value="Transfer Bank">Transfer Bank</option>
+        <option value="E-Wallet">E-Wallet (ShopeePay, GoPay)</option>
+      </select>
+
+      <button type="submit">Konfirmasi pembelian</button>
+    </form>
+  </div>
+
+  <script>
+    // Fungsi untuk menampilkan item keranjang (jika checkout dari keranjang)
+    function displayCheckoutItems() {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const checkoutItemsDiv = document.getElementById("checkout-items");
+      checkoutItemsDiv.innerHTML = "";
+      let total = 0;
+
+      if (cart.length === 0) {
+        checkoutItemsDiv.innerHTML = "<p>Keranjang Anda kosong.</p>";
+      } else {
+        cart.forEach(item => {
+          let quantity = item.quantity || 1;
+          let itemTotal = item.price * quantity;
+          total += itemTotal;
+          const itemDiv = document.createElement("div");
+          itemDiv.classList.add("checkout-item");
+          itemDiv.innerHTML = `
+            <img src="${item.image}" alt="${item.name}">
+            <div class="item-details">
+              <p>${item.name}</p>
+              <p>Harga: Rp${item.price.toLocaleString()} x ${quantity}</p>
+            </div>
+            <div class="item-price">Rp${itemTotal.toLocaleString()}</div>
+          `;
+          checkoutItemsDiv.appendChild(itemDiv);
+        });
+      }
+      document.getElementById("total-price").textContent = "Total: Rp" + total.toLocaleString();
+      return total;
+    }
+
+    // Ambil parameter dari URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const directName = urlParams.get('name');
+    const directPrice = urlParams.get('price');
+
+    let orderSummary = "";
+    let totalPriceValue = 0;
+
+    if (directName && directPrice) {
+      // Misal format directName: "Jam Tangan Pria Z01 - Model 2"
+      let productName = directName;
+      let modelName = "";
+      if (directName.includes(" - ")) {
+        const parts = directName.split(" - ");
+        productName = parts[0]; // "Jam Tangan Pria Z01"
+        modelName = parts.slice(1).join(" - "); // "Model 2" (atau lainnya)
+      }
+      totalPriceValue = parseInt(directPrice, 10);
+      orderSummary += `Produk: ${productName}\n`;
+      if (modelName) {
+        orderSummary += `Model: ${modelName}\n`;
+      }
+      orderSummary += `Harga: Rp ${totalPriceValue.toLocaleString()}\n`;
+
+      // Tampilkan ringkasan pembelian langsung
+      document.getElementById("direct-purchase-summary").innerHTML = `
+        <p><strong>${productName}</strong></p>
+        ${modelName ? `<p>Model: ${modelName}</p>` : ""}
+        <p>Harga: Rp ${totalPriceValue.toLocaleString()}</p>
+      `;
+      // Sembunyikan tampilan checkout dari keranjang
+      document.getElementById("checkout-items").style.display = "none";
+      document.getElementById("total-price").style.display = "none";
+    } else {
+      document.getElementById("direct-purchase-summary").style.display = "none";
+      totalPriceValue = displayCheckoutItems();
+      orderSummary = "";
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart.forEach(item => {
+        orderSummary += `${item.name} - Rp${item.price.toLocaleString()} x ${item.quantity || 1}\n`;
+      });
+    }
+
+    // Flag untuk mencegah submit ganda
+    let isSubmitting = false;
+
+    // Event ketika form checkout dikirim
+    document.getElementById("checkout-form").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      // Jika sudah dalam proses submit, abaikan event selanjutnya
+      if (isSubmitting) return;
+      isSubmitting = true;
+
+      const name = document.getElementById("name").value;
+      const phone = document.getElementById("phone").value;
+      const address = document.getElementById("address").value;
+      const paymentMethod = document.getElementById("payment-method").value;
+
+      // Ambil total harga (dalam nilai numerik)
+      const totalPrice = totalPriceValue; // angka
+
+      const whatsappMessage = 
+`Halo, saya ingin melakukan pemesanan:
+
+${orderSummary}
+Total Harga: Rp${totalPrice.toLocaleString()}
+
+Nama: ${name}
+No. Telepon: ${phone}
+Alamat: ${address}
+Metode Pembayaran: ${paymentMethod}
+
+Mohon konfirmasinya. Terima kasih!`;
+
+      // Simpan pesan tersebut ke localStorage untuk diambil di payment page
+      localStorage.setItem("whatsappMessage", whatsappMessage);
+
+      // Alihkan ke halaman payment.html, sertakan metode pembayaran dan total harga sebagai parameter
+      window.location.href = "payment.html?method=" + encodeURIComponent(paymentMethod) + "&price=" + totalPrice;
+    });
+  </script>
+</body>
+</html>
